@@ -33,13 +33,16 @@ export function buildStickerPrompt(o: {
   name: string;
   age: string;
   extra: string;
+  fromImage?: boolean;
 }): string {
   const texts: string[] = [];
   if (o.name.trim()) texts.push(`the child's name "${o.name.trim()}" in big, bold, playful, perfectly spelled letters`);
   if (o.age.trim()) texts.push(`the age "${o.age.trim()}" shown as a large decorative number`);
   return [
     `Design ${SHAPE_TEXT[o.shape]} for a children's birthday party.`,
-    `Theme: ${o.theme.trim()}. Create original characters and decorations inspired by this theme (no copyrighted logos), vibrant colors, cute cartoon style, high detail, print quality.`,
+    o.fromImage
+      ? `Use the attached image as the main reference: keep its theme, characters, colors and style, and turn it into a sticker illustration.${o.theme.trim() ? ` Theme hint: ${o.theme.trim()}.` : ""} Vibrant colors, cute cartoon style, high detail, print quality.`
+      : `Theme: ${o.theme.trim()}. Create original characters and decorations inspired by this theme (no copyrighted logos), vibrant colors, cute cartoon style, high detail, print quality.`,
     texts.length ? `Include ${texts.join(" and ")}. Spell every word exactly as written.` : "No text.",
     o.extra.trim() ? `Extra details: ${o.extra.trim()}.` : "",
     "Thick white border around the sticker edge, centered, fully visible, transparent background outside the sticker.",

@@ -18,3 +18,23 @@ export function generateSticker(apiKey: string, prompt: string, size: string, st
     }),
   });
 }
+
+export function editSticker(apiKey: string, form: FormData) {
+  const streaming = form.get("stream") !== "false";
+  form.set("model", imageSettings.model);
+  form.set("background", "transparent");
+  form.set("output_format", "png");
+  form.set("quality", "medium");
+  if (streaming) {
+    form.set("stream", "true");
+    form.set("partial_images", "1");
+  } else {
+    form.delete("stream");
+    form.delete("partial_images");
+  }
+  return fetch(`${imageSettings.baseURL}/v1/images/edits`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+}

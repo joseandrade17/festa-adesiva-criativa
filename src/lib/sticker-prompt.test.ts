@@ -8,6 +8,11 @@ describe("sticker prompt", () => {
     expect(p).toContain('"5"');
     expect(p).toContain("Mulher Maravilha");
   });
+  it("uses the uploaded image as reference when given", () => {
+    const p = buildStickerPrompt({ theme: "", shape: "redondo", name: "Bia", age: "", extra: "", fromImage: true });
+    expect(p).toContain("attached image");
+    expect(p).toContain('"Bia"');
+  });
   it("uses wide image for wide rectangle", () => {
     expect(imageSizeFor("retangular", 9, 4)).toBe("1536x1024");
     expect(imageSizeFor("redondo", 9, 4)).toBe("1024x1024");

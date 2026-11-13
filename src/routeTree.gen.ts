@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiGenerateStickerRouteImport } from './routes/api/generate-sticker'
+import { Route as ApiStickerFromImageRouteImport } from './routes/api/sticker-from-image'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const ApiGenerateStickerRoute = ApiGenerateStickerRouteImport.update({
   path: '/api/generate-sticker',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStickerFromImageRoute = ApiStickerFromImageRouteImport.update({
+  id: '/api/sticker-from-image',
+  path: '/api/sticker-from-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/generate-sticker': typeof ApiGenerateStickerRoute
+  '/api/sticker-from-image': typeof ApiStickerFromImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/generate-sticker': typeof ApiGenerateStickerRoute
+  '/api/sticker-from-image': typeof ApiStickerFromImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/generate-sticker': typeof ApiGenerateStickerRoute
+  '/api/sticker-from-image': typeof ApiStickerFromImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/generate-sticker'
+  fullPaths: '/' | '/api/generate-sticker' | '/api/sticker-from-image'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/generate-sticker'
-  id: '__root__' | '/' | '/api/generate-sticker'
+  to: '/' | '/api/generate-sticker' | '/api/sticker-from-image'
+  id: '__root__' | '/' | '/api/generate-sticker' | '/api/sticker-from-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiGenerateStickerRoute: typeof ApiGenerateStickerRoute
+  ApiStickerFromImageRoute: typeof ApiStickerFromImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGenerateStickerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sticker-from-image': {
+      id: '/api/sticker-from-image'
+      path: '/api/sticker-from-image'
+      fullPath: '/api/sticker-from-image'
+      preLoaderRoute: typeof ApiStickerFromImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiGenerateStickerRoute: ApiGenerateStickerRoute,
+  ApiStickerFromImageRoute: ApiStickerFromImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

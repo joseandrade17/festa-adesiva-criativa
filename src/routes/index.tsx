@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Download, Printer, Search, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { Download, ImagePlus, Printer, Search, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { streamImage } from "@/lib/stream-image";
 import { SHAPES, buildStickerPrompt, imageSizeFor, type Shape } from "@/lib/sticker-prompt";
 
@@ -41,6 +41,8 @@ function Index() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stickers, setStickers] = useState<Sticker[]>([]);
+  const [refFile, setRefFile] = useState<File | null>(null);
+  const [refUrl, setRefUrl] = useState<string | null>(null);
   const [printing, setPrinting] = useState<Sticker | null>(null);
 
   const squareish = shape !== "retangular" && shape !== "livre";
@@ -51,18 +53,26 @@ function Index() {
 
   async function generate(themeOverride?: string) {
     const t = (themeOverride ?? theme).trim();
-    if (!t) return setError("Digite um tema.");
+    if (!t && !refFile) return setError("Digite um tema ou envie uma imagem.");
     setTheme(t);
     setBusy(true); setError(null); setFinal(false); setPreview(null);
     const height = squareish ? w : h;
     try {
       let last = "";
-      await streamImage(
+      const size = imageSizeFor(shape, w, height);
+      const onFrame = (url: string, isFinal: boolean) => { last = url; setPreview(url); setFinal(isFinal); };
+      if (refFile) {
+        const form = new FormData();
+        form.append("image", refFile);
+        form.append("prompt", buildStickerPrompt({ theme: t, shape, name, age, extra, fromImage: true }));
+        form.append("size", size);
+        await streamImage("/api/sticker-from-image", form, onFrame);
+      } else await streamImage(
         "/api/generate-sticker",
-        { prompt: buildStickerPrompt({ theme: t, shape, name, age, extra }), size: imageSizeFor(shape, w, height) },
+        { prompt: buildStickerPrompt({ theme: t, shape, name, age, extra }), size },
         (url, isFinal) => { last = url; setPreview(url); setFinal(isFinal); },
       );
-      setStickers((s) => [{ id: crypto.randomUUID(), src: last, theme: t, shape, w, h: height, name }, ...s]);
+      setStickers((s) => [{ id: crypto.randomUUID(), src: last, theme: t || "Da minha imagem", shape, w, h: height, name }, ...s]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Não foi possível criar o adesivo.");
     } finally {
@@ -116,6 +126,23 @@ function Index() {
                 ))}
                 {!filtered.length && <p className="text-sm text-muted-foreground">Tema novo! Clique em “Criar” e a IA inventa o adesivo.</p>}
               </div>
+            </div>
+
+            <div>
+              <label className={label}>Criar a partir de uma imagem (opcional)</label>
+              {refUrl ? (
+                <div className="flex items-center gap-3 rounded-xl border-2 border-dashed border-primary bg-muted p-2">
+                  <img src={refUrl} alt="Imagem de referência" className="size-16 rounded-lg object-cover" />
+                  <p className="flex-1 text-sm font-semibold">A IA vai usar o tema desta imagem no adesivo.</p>
+                  <button onClick={() => { setRefFile(null); setRefUrl(null); }} title="Remover imagem" className="rounded-lg bg-card p-2"><X className="size-4" /></button>
+                </div>
+              ) : (
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted py-4 font-bold text-muted-foreground transition hover:border-primary hover:text-primary">
+                  <ImagePlus className="size-5" /> Enviar imagem do tema
+                  <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) { setRefFile(f); setRefUrl(URL.createObjectURL(f)); } }} />
+                </label>
+              )}
             </div>
 
             <div>
