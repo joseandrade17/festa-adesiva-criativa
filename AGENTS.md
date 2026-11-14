@@ -30,3 +30,4 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Sticker images are generated via the server route /api/generate-sticker (streams from the AI gateway); prompt building lives in src/lib/sticker-prompt.ts so it stays testable.
+- Keep purchase amounts and free-generation eligibility in `src/lib/sticker-credits.ts`; database-backed handlers must enforce reservations atomically, because shared pure rules alone cannot secure balances.
